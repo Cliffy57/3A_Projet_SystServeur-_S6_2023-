@@ -1,4 +1,4 @@
-package fr.iut.licenceproservlet;
+package fr.iut.licenceproservlet.draft;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

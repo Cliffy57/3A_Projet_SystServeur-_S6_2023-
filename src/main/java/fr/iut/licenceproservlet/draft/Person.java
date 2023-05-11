@@ -1,4 +1,4 @@
-package fr.iut.licenceproservlet;
+package fr.iut.licenceproservlet.draft;
 
 public class Person {
     private String name;

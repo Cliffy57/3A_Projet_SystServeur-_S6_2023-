@@ -1,4 +1,4 @@
-<%@ page import="fr.iut.licenceproservlet.Car" %>
+<%@ page import="fr.iut.licenceproservlet.draft.Car" %>
 <%@ page import="java.util.List" %><%--
   Created by IntelliJ IDEA.
   User: hugof

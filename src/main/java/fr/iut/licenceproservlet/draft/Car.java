@@ -1,4 +1,4 @@
-package fr.iut.licenceproservlet;
+package fr.iut.licenceproservlet.draft;
 
 public class Car {
     public Car(int id, String model, String color) {

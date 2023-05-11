@@ -1,4 +1,4 @@
-<jsp:useBean id="person" scope="request" type="fr.iut.licenceproservlet.Person"/>
+<jsp:useBean id="person" scope="request" type="fr.iut.licenceproservlet.draft.Person"/>
 <%--
   Created by IntelliJ IDEA.
   User: hugof

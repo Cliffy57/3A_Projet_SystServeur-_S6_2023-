@@ -1,16 +1,16 @@
-package fr.iut.licenceproservlet;
+package fr.iut.licenceproservlet.draft;
 
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.iut.licenceproservlet.draft.Car;
+import fr.iut.licenceproservlet.draft.Jdbc;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
-
-import static java.lang.System.out;
 
 @WebServlet(name = "helloServlet", value = "/hello-servlet")
 public class HelloServlet extends HttpServlet {

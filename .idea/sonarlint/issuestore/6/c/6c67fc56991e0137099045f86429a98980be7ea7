@@ -1,0 +1,14 @@
+
+—
+java:S1186s"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(‚“¶î
+q
+java:S1450"VRemove the "message" field and declare it as a local variable in the relevant methods.(ù„è¿ûÿÿÿÿ
+P
+java:S1161":Add the "@Override" annotation above this method signature( Üó
+U
+java:S1161":Add the "@Override" annotation above this method signature(°Å·ğşÿÿÿÿ
+P
+java:S1161s":Add the "@Override" annotation above this method signature(‚“¶î
+Q	java:S1258"<This block of commented-out lines of code should be removed.(ôù„ˆ
+F
+java:S1068"+Remove this unused "message" private field.(ù„è¿ûÿÿÿÿ

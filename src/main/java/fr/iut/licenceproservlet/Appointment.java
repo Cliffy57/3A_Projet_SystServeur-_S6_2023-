@@ -1,13 +1,12 @@
 package fr.iut.licenceproservlet;
 
-import jakarta.persistence.*;
-
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "appointments")
+@Table(name = "appointment")
 public class Appointment {
 
     @Id
@@ -32,6 +31,9 @@ public class Appointment {
 
     }
 
+    public Appointment(Date date, Employe employe, Client client) {
+    }
+
     // Constructeurs, getters et setters
 
     // Méthode pour vérifier si un rendez-vous existe déjà pour un client et un employé donnés
@@ -51,11 +53,11 @@ public class Appointment {
     }
 
     public static List<Appointment> findByEmployee(EntityManager entityManager) {
-        return entityManager.createQuery("SELECT a FROM Appointment a ORDER BY a.employee.name", Appointment.class).getResultList();
+        return entityManager.createQuery("SELECT a FROM Appointment a ORDER BY a.employee.lastname", Appointment.class).getResultList();
     }
 
     public static List<Appointment> findByClient(EntityManager entityManager) {
-        return entityManager.createQuery("SELECT a FROM Appointment a ORDER BY a.client.name", Appointment.class).getResultList();
+        return entityManager.createQuery("SELECT a FROM Appointment a ORDER BY a.client.lastname", Appointment.class).getResultList();
     }
 
     // Méthode pour récupérer un rendez-vous par ID

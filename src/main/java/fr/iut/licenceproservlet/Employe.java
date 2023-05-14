@@ -1,20 +1,20 @@
 package fr.iut.licenceproservlet;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import javax.persistence.*;
 
 @Entity
+@Table(name = "employee")
 public class Employe {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "lastname")
+    private String lastname;
+    @Column(name = "firstname")
 
-    private String name;
-
-    private String surname;
+    private String firstname;
+    @Column(name = "email")
 
     private String email;
 
@@ -23,9 +23,9 @@ public class Employe {
     public Employe() {
     }
 
-    public Employe(String name, String surname, String email) {
-        this.name = name;
-        this.surname = surname;
+    public Employe(String lastname, String surname, String email) {
+        this.lastname = lastname;
+        this.firstname = surname;
         this.email = email;
     }
 
@@ -38,19 +38,19 @@ public class Employe {
     }
 
     public String getNom() {
-        return name;
+        return lastname;
     }
 
     public void setNom(String name) {
-        this.name = name;
+        this.lastname = name;
     }
 
     public String getPrename() {
-        return surname;
+        return firstname;
     }
 
     public void setPrename(String surname) {
-        this.surname = surname;
+        this.firstname = surname;
     }
 
     public String getEmail() {
@@ -61,4 +61,7 @@ public class Employe {
         this.email = email;
     }
 
+    public String getFirstName() {
+        return this.lastname;
+    }
 }

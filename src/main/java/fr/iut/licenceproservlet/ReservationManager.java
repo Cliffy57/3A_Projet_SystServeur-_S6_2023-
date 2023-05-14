@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Objects;
 
 import fr.iut.licenceproservlet.exception.ClientEmployeOverlapException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
-import jakarta.persistence.TypedQuery;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 
 public class ReservationManager {
 
@@ -25,10 +25,10 @@ public class ReservationManager {
 
     public List<Appointment> getAppointment() {
         EntityManager em = emf.createEntityManager();
-        TypedQuery<Appointment> query = em.createQuery("SELECT r FROM Appointment r ORDER BY r.date, r.employee.name," +
+        TypedQuery<Appointment> query = em.createQuery("SELECT r FROM Appointment r ORDER BY r.date, r.employee.lastname," +
                 " " +
                 "r" +
-                ".client.name", Appointment.class);
+                ".client.lastname", Appointment.class);
         List<Appointment> result = query.getResultList();
         em.close();
         return result;
@@ -37,7 +37,7 @@ public class ReservationManager {
     public List<Appointment> getAppointmentByDate(LocalDateTime date) {
         EntityManager em = emf.createEntityManager();
         TypedQuery<Appointment> query = em.createQuery("SELECT r FROM Appointment r WHERE r.date = :date ORDER BY r" +
-                ".employee.name, r.client.name", Appointment.class);
+                ".employee.lastname, r.client.lastname", Appointment.class);
         query.setParameter("date", date);
         List<Appointment> result = query.getResultList();
         em.close();
@@ -47,7 +47,7 @@ public class ReservationManager {
     public List<Appointment> getAppointmentByEmploye(Employe employe) {
         EntityManager em = emf.createEntityManager();
         TypedQuery<Appointment> query = em.createQuery("SELECT r FROM Appointment r WHERE r.employee = :employe ORDER" +
-                " BY r.date, r.client.name", Appointment.class);
+                " BY r.date, r.client.lastname", Appointment.class);
         query.setParameter("employe", employe);
         List<Appointment> result = query.getResultList();
         em.close();
@@ -57,7 +57,7 @@ public class ReservationManager {
     public List<Appointment> getAppointmentByClient(Client client) {
         EntityManager em = emf.createEntityManager();
         TypedQuery<Appointment> query = em.createQuery("SELECT r FROM Appointment r WHERE r.client = :client ORDER BY" +
-                " r.date, r.employee.name", Appointment.class);
+                " r.date, r.employee.lastname", Appointment.class);
         query.setParameter("client", client);
         List<Appointment> result = query.getResultList();
         em.close();

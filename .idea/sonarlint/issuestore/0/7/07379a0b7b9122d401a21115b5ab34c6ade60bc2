@@ -1,0 +1,15 @@
+
+H
+java:S1199"-Extract this nested code block into a method.(ÒÌâ–øÿÿÿÿ
+c
+java:S2095"HUse try-with-resources or close this "Connection" in a "finally" clause.(ÀÙ˜Òşÿÿÿÿ
+D
+java:S2115")Add password protection to this database.(ÀÙ˜Òşÿÿÿÿ
+Y
+java:S1854">Remove this useless assignment to local variable "connection".(ÀÙ˜Òşÿÿÿÿ
+”
+java:S1130"yRemove the declaration of thrown exception 'java.lang.ClassNotFoundException', as it cannot be thrown from method's body.(£°îùÿÿÿÿ
+E
+java:S1481"/Remove this unused "connection" local variable.(óøµó
+D
+java:S2115")Add password protection to this database.(ÀÙ˜Òşÿÿÿÿ

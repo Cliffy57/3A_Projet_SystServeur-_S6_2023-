@@ -70,4 +70,8 @@ public class Client {
     public String getLastName() {
         return lastname;
     }
+
+    public void setName(String clientName) {
+        this.lastname = clientName;
+    }
 }

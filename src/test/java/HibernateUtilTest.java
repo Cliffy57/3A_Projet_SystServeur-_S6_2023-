@@ -1,9 +1,11 @@
 import fr.iut.licenceproservlet.Appointment;
 import fr.iut.licenceproservlet.Client;
+import fr.iut.licenceproservlet.Employee;
 import fr.iut.licenceproservlet.utils.HibernateUtil;
 import org.hibernate.Session;
 import org.junit.jupiter.api.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class HibernateUtilTest {
@@ -39,5 +41,7 @@ public class HibernateUtilTest {
 
         session.getTransaction().commit();
     }
+
+
 
 }

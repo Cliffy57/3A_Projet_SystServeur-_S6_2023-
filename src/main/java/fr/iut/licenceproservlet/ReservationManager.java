@@ -7,6 +7,7 @@ import java.util.Objects;
 import fr.iut.licenceproservlet.exception.ClientEmployeOverlapException;
 import fr.iut.licenceproservlet.utils.HibernateUtil;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -110,45 +111,28 @@ public class ReservationManager {
         return employee;
     }
 
-    public boolean hasConflictingAppointments(Appointment appointment) {
+    public boolean hasConflictingAppointments(Client client, Employee employee, LocalDateTime date) {
+        // Query the database for appointments with the same date and either the same client or the same employee
+        String hql = "FROM Appointment WHERE date = :date AND (client.id = :clientId OR employee.id = :employeeId)";
         Session session = HibernateUtil.getSession();
-        session.beginTransaction();
+        Query query = session.createQuery(hql);
+        query.setParameter("date", date);
+        query.setParameter("clientId", client.getId());
+        query.setParameter("employeeId", employee.getId());
 
-        // Check if there are any conflicting appointments for the same client and employee
-        List<Appointment> conflictingAppointments = session.createQuery(
-                        "SELECT a FROM Appointment a WHERE a.client = :client AND a.employee = :employee AND a.date = :date AND a.id != :id",
-                        Appointment.class)
-                .setParameter("client", appointment.getClient())
-                .setParameter("employee", appointment.getEmployee())
-                .setParameter("date", appointment.getDate())
-                .setParameter("id", appointment.getId())
-                .getResultList();
+        List<Appointment> conflictingAppointments = query.list();
 
-        session.getTransaction().commit();
-
+        // Return true if conflicting appointments are found, false otherwise
         return !conflictingAppointments.isEmpty();
     }
 
-    public void addAppointment(Appointment appointment) {
+
+        public void updateAppointment(Appointment appointment) {
         Session session = HibernateUtil.getSession();
         session.beginTransaction();
 
         // Check for conflicting appointments
-        if (hasConflictingAppointments(appointment)) {
-            throw new IllegalStateException("Cannot add appointment. Conflicting appointment already exists.");
-        }
-
-        // Save the appointment
-        session.save(appointment);
-        session.getTransaction().commit();
-    }
-
-    public void updateAppointment(Appointment appointment) {
-        Session session = HibernateUtil.getSession();
-        session.beginTransaction();
-
-        // Check for conflicting appointments
-        if (hasConflictingAppointments(appointment)) {
+        if (hasConflictingAppointments(appointment.getClient(), appointment.getEmployee(), appointment.getDate())) {
             throw new IllegalStateException("Cannot update appointment. Conflicting appointment already exists.");
         }
 
@@ -166,4 +150,23 @@ public class ReservationManager {
         em.close();
     }
 
+    public Client getClientByName(String clientName) {
+        Session session = HibernateUtil.getSession();
+        session.beginTransaction();
+        Client client = session.createQuery("FROM Client WHERE lastname = :lastname", Client.class)
+                .setParameter("lastname", clientName)
+                .getSingleResult();
+        session.getTransaction().commit();
+        return client;
+    }
+
+    public Employee getEmployeeByName(String employeeName) {
+        Session session = HibernateUtil.getSession();
+        session.beginTransaction();
+        Employee employee = session.createQuery("FROM Employee WHERE lastname = :lastname", Employee.class)
+                .setParameter("lastname", employeeName)
+                .getSingleResult();
+        session.getTransaction().commit();
+        return employee;
+    }
 }

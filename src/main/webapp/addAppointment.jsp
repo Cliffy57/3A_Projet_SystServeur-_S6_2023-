@@ -8,16 +8,26 @@
 </head>
 <body>
 <h1>Add Appointment</h1>
-<form action="appointment" method="post">
+<form action="appointment-servlet" method="post">
+  <input type="hidden" name="action" value="add">
   <label for="date">Date:</label>
   <input type="datetime-local" id="date" name="date" required>
   <br>
-  <label for="client">Client:</label>
-  <input type="text" id="client" name="client" required>
+
+  <label for="clientFirstName">Client First Name:</label>
+  <input type="text" id="clientFirstName" name="clientFirstName" required>
   <br>
-  <label for="employee">Employee:</label>
-  <input type="text" id="employee" name="employee" required>
+  <label for="clientLastName">Client Last Name:</label>
+  <input type="text" id="clientLastName" name="clientLastName" required>
   <br>
+
+  <label for="employeeFirstName">Employee First Name:</label>
+  <input type="text" id="employeeFirstName" name="employeeFirstName" required>
+  <br>
+  <label for="employeeLastName">Employee Last Name:</label>
+  <input type="text" id="employeeLastName" name="employeeLastName" required>
+  <br>
+
   <input type="submit" value="Add Appointment">
 </form>
 

@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" import="java.util.*, fr.iut.licenceproservlet.Appointment" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,6 +8,12 @@
 </head>
 <body>
 <h1>Liste des rendez-vous</h1>
+
+<!-- Add Appointment Button -->
+<a href="addAppointment.jsp">
+    <button type="button">Add Appointment</button>
+</a>
+
 <table border="1">
     <thead>
     <tr>
@@ -24,7 +31,7 @@
     %>
     <tr>
         <td><%=appointment.getId()%></td>
-        <td><%=appointment.getDate()%></td>
+        <td><%= DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").format(appointment.getDate()) %></td>
         <td><%=appointment.getClient().getLastName()%></td>
         <td><%=appointment.getEmployee().getLastName()%></td>
     </tr>

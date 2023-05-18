@@ -6,10 +6,13 @@ import fr.iut.licenceproservlet.Employee;
 import fr.iut.licenceproservlet.ReservationManager;
 
 
+import fr.iut.licenceproservlet.utils.HibernateUtil;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import org.hibernate.Session;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -91,28 +94,43 @@ public class AppointmentServlet extends HttpServlet {
         // Get the form data
         String dateStr = request.getParameter("date");
         LocalDateTime date = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        Long clientId = Long.parseLong(request.getParameter("clientId"));
-        Long employeeId = Long.parseLong(request.getParameter("employeeId"));
+        String clientName = request.getParameter("client");
+        String employeeName = request.getParameter("employee");
 
         // Perform validation
         // ...
 
-        // Create a new appointment object
-        Client client = reservationManager.getClientById(clientId);
-        Employee employee = reservationManager.getEmployeeById(employeeId);
-        Appointment appointment = new Appointment(date, employee, client);
+        // Get session
+        Session session = HibernateUtil.getSession();
+        session.beginTransaction();
+
+        // Fetch existing or TODO create new client
+        Client client = reservationManager.getClientByName(clientName);
+
+        // Fetch existing or TODO create new employee
+        Employee employee = reservationManager.getEmployeeByName(employeeName);
+
 
         // Check for conflicting appointments
-        if (reservationManager.hasConflictingAppointments(appointment)) {
+        if (reservationManager.hasConflictingAppointments(client, employee, date)) {
             // Handle conflicting appointments, show error message or redirect to a different page
+            request.setAttribute("error", "Appointment already exists");
+            request.getRequestDispatcher("/new_index.jsp").forward(request, response);
         } else {
-            // Save the appointment using the reservationManager
-            reservationManager.addAppointment(appointment);
+            // Create a new appointment object
+            Appointment appointment = new Appointment(date, employee, client);
+
+            // Save the appointment
+            session.save(appointment);
+
+            // Commit transaction and close session
+            session.getTransaction().commit();
 
             // Redirect or forward to appropriate page
             response.sendRedirect(request.getContextPath() + "/appointments");
         }
     }
+
 
 
     private void editAppointment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

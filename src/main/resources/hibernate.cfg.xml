@@ -18,7 +18,7 @@
 
         <!-- Mapping files -->
         <mapping class="fr.iut.licenceproservlet.Client"/>
-        <mapping class="fr.iut.licenceproservlet.Employe"/>
+        <mapping class="fr.iut.licenceproservlet.Employee"/>
         <mapping class="fr.iut.licenceproservlet.Appointment"/>
     </session-factory>
 </hibernate-configuration>

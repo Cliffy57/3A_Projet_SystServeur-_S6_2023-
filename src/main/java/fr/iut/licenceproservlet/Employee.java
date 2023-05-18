@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "employee")
-public class Employe {
+public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,10 +20,10 @@ public class Employe {
 
     // constructeurs, getters et setters
 
-    public Employe() {
+    public Employee() {
     }
 
-    public Employe(String lastname, String surname, String email) {
+    public Employee(String lastname, String surname, String email) {
         this.lastname = lastname;
         this.firstname = surname;
         this.email = email;
@@ -63,5 +63,8 @@ public class Employe {
 
     public String getFirstName() {
         return this.lastname;
+    }
+
+    public String getLastName() {return lastname;
     }
 }

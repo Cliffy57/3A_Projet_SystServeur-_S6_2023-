@@ -1,7 +1,10 @@
 package fr.iut.licenceproservlet;
 
+
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -22,22 +25,28 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "employee_id")
-    private Employe employee;
+    private Employee employee;
 
-    public Appointment(LocalDateTime date, Employe employe, Client client) {
+    public Appointment(LocalDateTime date, Employee employee, Client client) {
+        this.date = Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
+        this.employee = employee;
+        this.client = client;
     }
 
     public Appointment() {
 
     }
 
-    public Appointment(Date date, Employe employe, Client client) {
+    public Appointment(Date date, Employee employee, Client client) {
+        this.date = date;
+        this.employee = employee;
+        this.client = client;
     }
 
     // Constructeurs, getters et setters
 
     // Méthode pour vérifier si un rendez-vous existe déjà pour un client et un employé donnés
-    public static boolean existsForClientAndEmployee(EntityManager entityManager, Client client, Employe employee,
+    public static boolean existsForClientAndEmployee(EntityManager entityManager, Client client, Employee employee,
                                                      Date date) {
         List<Appointment> appointments = entityManager.createQuery("SELECT a FROM Appointment a WHERE a.client = :client AND a.employee = :employee AND a.date = :date", Appointment.class)
                 .setParameter("client", client)
@@ -66,10 +75,10 @@ public class Appointment {
     }
 
     public LocalDateTime getDate() {
-        return getDate();
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
-    public Employe getEmploye() {
+    public Employee getEmployee() {
         return employee;
     }
 
@@ -79,6 +88,19 @@ public class Appointment {
 
     public Long getId() {
         return id;
+    }
+
+
+    public void setDate(LocalDateTime dateTime) {
+        this.date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     // Autres méthodes pour modifier, supprimer, etc. des rendez-vous

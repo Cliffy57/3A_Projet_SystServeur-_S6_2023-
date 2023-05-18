@@ -66,4 +66,8 @@ public class Client {
     public String getFirstName() {
         return this.firstname;
     }
+
+    public String getLastName() {
+        return lastname;
+    }
 }

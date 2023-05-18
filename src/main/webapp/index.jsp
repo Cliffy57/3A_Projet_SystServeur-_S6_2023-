@@ -17,5 +17,7 @@
 <a href="./variable.jsp">Variables Example</a>
 <br/>
 <a href="./cars.jsp">Cars</a>
+<br/>
+<a href="appointment-servlet">Appointment Servlet</a>
 </body>
 </html>

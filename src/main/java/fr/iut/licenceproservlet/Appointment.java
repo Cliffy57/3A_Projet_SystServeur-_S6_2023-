@@ -16,8 +16,8 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "date")
-    private Date date;
+    @Column(name = "date",columnDefinition = "TIMESTAMP")
+    private LocalDateTime date;
 
     @Column(name = "duration")
     private int duration;
@@ -31,7 +31,7 @@ public class Appointment {
     private Employee employee;
 
     public Appointment(LocalDateTime date,int duration, Employee employee, Client client) {
-        this.date = Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
+        this.date = date;
         this.duration = duration;
         this.employee = employee;
         this.client = client;
@@ -41,10 +41,6 @@ public class Appointment {
 
     }
 
-    public Appointment(LocalDateTime now, Employee employee, Client client)
-    {
-        this(now, 30, employee, client);
-    }
 
 
     // Constructeurs, getters et setters
@@ -79,7 +75,7 @@ public class Appointment {
     }
 
     public LocalDateTime getDate() {
-        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        return date;
     }
 
     public Employee getEmployee() {
@@ -96,7 +92,7 @@ public class Appointment {
 
 
     public void setDate(LocalDateTime dateTime) {
-        this.date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+        this.date = dateTime;
     }
 
     public void setClient(Client client) {

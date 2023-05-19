@@ -4,13 +4,13 @@ import fr.iut.licenceproservlet.Appointment;
 import fr.iut.licenceproservlet.Client;
 import fr.iut.licenceproservlet.Employee;
 import fr.iut.licenceproservlet.ReservationManager;
-
-
 import fr.iut.licenceproservlet.utils.HibernateUtil;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hibernate.Session;
 
 import java.io.IOException;
@@ -52,6 +52,27 @@ public class AppointmentServlet extends HttpServlet {
                 case "new":
                     showNewAppointmentForm(request, response);
                     break;
+                case "modify":
+                    // handle modify action (show modify appointment form)
+                    String idStr = request.getParameter("id");
+                    if (idStr != null) {
+                        Long id = Long.parseLong(idStr);
+                        Appointment appointment = reservationManager.getAppointmentById(id);
+                        if (appointment != null) {
+                            // Set the clients as an attribute in the request scope
+                            request.setAttribute("clients", reservationManager.getClients());
+                            // Set the employees as an attribute in the request scope
+                            request.setAttribute("employees", reservationManager.getEmployees());
+                            // Set the appointment as an attribute in the request scope
+                            request.setAttribute("appointment", appointment);
+                            request.getRequestDispatcher("/editAppointment.jsp").forward(request, response);
+                        } else {
+                            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Appointment not found");
+                        }
+                    } else {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No appointment ID provided");
+                    }
+                    break;
                 default:
                     // Handle unexpected action values accordingly
             }
@@ -82,7 +103,7 @@ public class AppointmentServlet extends HttpServlet {
                 case "add":
                     addAppointment(request, response);
                     break;
-                case "edit":
+                case "update":
                     editAppointment(request, response);
                     break;
                 case "delete":
@@ -119,31 +140,32 @@ public class AppointmentServlet extends HttpServlet {
         String dateStr = request.getParameter("date");
         int duration = Integer.parseInt(request.getParameter("duration"));
         LocalDateTime date = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        String clientName = request.getParameter("client");
-        String employeeName = request.getParameter("employee");
-
-        // Perform validation
-        // ...
+        Long clientId = Long.parseLong(request.getParameter("client"));
+        Long employeeId = Long.parseLong(request.getParameter("employee"));
 
         // Get session
         Session session = HibernateUtil.getSession();
         session.beginTransaction();
 
-        // Fetch existing or TODO create new client
-        Client client = reservationManager.getClientByName(clientName);
+        // Fetch existing client
+        Client client = reservationManager.getClientById(clientId);
 
-        // Fetch existing or TODO create new employee
-        Employee employee = reservationManager.getEmployeeByName(employeeName);
-
+        // Fetch existing employee
+        Employee employee = reservationManager.getEmployeeById(employeeId);
 
         // Check for conflicting appointments
         if (reservationManager.hasConflictingAppointments(client, employee, date)) {
             // Handle conflicting appointments, show error message or redirect to a different page
+            System.out.println("Conflicting appointments");
             request.setAttribute("error", "Appointment already exists");
+            // Fetch appointments and set as attribute
+            List<Appointment> appointments = reservationManager.getAppointments();
+            request.setAttribute("appointments", appointments);
+            // Forward to JSP
             request.getRequestDispatcher("/new_index.jsp").forward(request, response);
         } else {
             // Create a new appointment object
-            Appointment appointment = new Appointment(date,duration, employee, client);
+            Appointment appointment = new Appointment(date, duration, employee, client);
 
             // Save the appointment
             session.save(appointment);
@@ -157,17 +179,14 @@ public class AppointmentServlet extends HttpServlet {
     }
 
 
-
     private void editAppointment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Get the form data
         Long id = Long.parseLong(request.getParameter("id"));
         String dateStr = request.getParameter("date");
         LocalDateTime date = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        Long clientId = Long.parseLong(request.getParameter("clientId"));
-        Long employeeId = Long.parseLong(request.getParameter("employeeId"));
+        Long clientId = Long.parseLong(request.getParameter("client_id"));
+        Long employeeId = Long.parseLong(request.getParameter("employee_id"));
 
-        // Perform validation
-        // ...
 
         // Retrieve the existing appointment using its ID
         Appointment appointment = reservationManager.getAppointmentById(id);
@@ -189,22 +208,22 @@ public class AppointmentServlet extends HttpServlet {
         }
     }
 
-        private void deleteAppointment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-            // Get the appointment ID to be deleted
-            Long id = Long.parseLong(request.getParameter("id"));
+    private void deleteAppointment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Get the appointment ID to be deleted
+        Long id = Long.parseLong(request.getParameter("id"));
 
-            // Retrieve the existing appointment using its ID
-            Appointment appointment = reservationManager.getAppointmentById(id);
+        // Retrieve the existing appointment using its ID
+        Appointment appointment = reservationManager.getAppointmentById(id);
 
-            if (appointment != null) {
-                // Delete the appointment using the reservationManager
-                reservationManager.deleteAppointment(appointment);
+        if (appointment != null) {
+            // Delete the appointment using the reservationManager
+            reservationManager.deleteAppointment(appointment);
 
-                // Redirect or forward to appropriate page
-                response.sendRedirect(request.getContextPath() + "/appointments");
-            } else {
-                // Appointment not found, handle accordingly
-            }
+            // Redirect or forward to appropriate page
+            response.sendRedirect(request.getContextPath() + "/appointments");
+        } else {
+            // Appointment not found, handle accordingly
         }
+    }
 
 }

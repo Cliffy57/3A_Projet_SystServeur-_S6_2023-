@@ -121,7 +121,8 @@ public class ReservationManager {
         query.setParameter("employeeId", employee.getId());
 
         List<Appointment> conflictingAppointments = query.list();
-
+        System.out.printf("Found %d conflicting appointments%n", conflictingAppointments.size());
+        System.out.println(conflictingAppointments);
         // Return true if conflicting appointments are found, false otherwise
         return !conflictingAppointments.isEmpty();
     }
@@ -168,5 +169,24 @@ public class ReservationManager {
                 .getSingleResult();
         session.getTransaction().commit();
         return employee;
+    }
+
+    public  List<Client> getClients() {
+        Session session = HibernateUtil.getSession();
+        session.beginTransaction();
+        List<Client> result = session.createQuery("from Client", Client.class).list();
+        System.out.println("Retrieved " + result.size() + " clients by reservation manager");
+        session.getTransaction().commit();
+        session.close();
+        return result;
+    }
+    public  List<Employee> getEmployees() {
+        Session session = HibernateUtil.getSession();
+        session.beginTransaction();
+        List<Employee> result = session.createQuery("from Employee", Employee.class).list();
+        System.out.println("Retrieved " + result.size() + " employees by reservation manager");
+        session.getTransaction().commit();
+        session.close();
+        return result;
     }
 }

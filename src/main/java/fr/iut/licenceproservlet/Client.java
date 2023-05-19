@@ -2,8 +2,6 @@ package fr.iut.licenceproservlet;
 
 import javax.persistence.*;
 
-import javax.persistence.*;
-
 @Entity
 @Table(name = "client")
 public class Client {

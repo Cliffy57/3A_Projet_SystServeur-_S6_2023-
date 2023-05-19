@@ -62,7 +62,7 @@ public class Employee {
     }
 
     public String getFirstName() {
-        return this.lastname;
+        return firstname;
     }
 
     public String getLastName() {return lastname;

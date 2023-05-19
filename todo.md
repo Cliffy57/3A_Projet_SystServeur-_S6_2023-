@@ -13,8 +13,6 @@ Servlets : Vous aurez besoin d'au moins une servlet pour gérer les demandes HTT
 
 JSP : Vous aurez besoin d'au moins une JSP pour afficher le contenu de l'application. Cependant, vous pouvez en avoir plusieurs pour afficher différents types d'informations. Par exemple, une JSP pour afficher la liste des rendez-vous, une autre pour ajouter un rendez-vous, une autre pour modifier un rendez-vous, etc. En fonction de la complexité de l'application, vous pouvez vous retrouver avec entre 3 et 8 JSP.
 
-Fix tranquillou le bazar car les test Unitaire marchent
-
 ## PROBLEMES
 
 c'est ca qui créer l'erreur : <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> dans les jsp l'usage 

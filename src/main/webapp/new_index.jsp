@@ -10,7 +10,7 @@
 <h1>Liste des rendez-vous</h1>
 
 <!-- Add Appointment Button -->
-<a href="addAppointment.jsp">
+<a href="appointment-servlet?action=new">
     <button type="button">Add Appointment</button>
 </a>
 

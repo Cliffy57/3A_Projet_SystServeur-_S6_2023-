@@ -34,19 +34,43 @@ public class AppointmentServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Assuming you have a List<Appointment> appointments
-        List<Appointment> appointments = reservationManager.getAppointments(); // Your logic to retrieve appointments
+        String action = request.getParameter("action");
 
-        System.out.println("Retrieved " + appointments.size() + " appointments by Servlet");  // <-- Add this line
+        if (action == null) { // If there's no action parameter, show the appointments
+            List<Appointment> appointments = reservationManager.getAppointments(); // Your logic to retrieve appointments
 
-        // Set the appointments as an attribute in the request scope
-        request.setAttribute("appointments", appointments);
+            System.out.println("Retrieved " + appointments.size() + " appointments by Servlet");  // <-- Add this line
 
-        // Forward the request to the JSP
-        RequestDispatcher dispatcher = request.getRequestDispatcher("new_index.jsp");
-        dispatcher.forward(request, response);
+            // Set the appointments as an attribute in the request scope
+            request.setAttribute("appointments", appointments);
+
+            // Forward the request to the JSP
+            RequestDispatcher dispatcher = request.getRequestDispatcher("new_index.jsp");
+            dispatcher.forward(request, response);
+        } else {
+            switch (action) {
+                case "new":
+                    showNewAppointmentForm(request, response);
+                    break;
+                default:
+                    // Handle unexpected action values accordingly
+            }
+        }
     }
 
+    private void showNewAppointmentForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Session session = HibernateUtil.getSession();
+        session.beginTransaction();
+
+        List<Client> clients = session.createQuery("from Client", Client.class).list();
+        List<Employee> employees = session.createQuery("from Employee", Employee.class).list();
+
+        session.getTransaction().commit();
+
+        request.setAttribute("clients", clients);
+        request.setAttribute("employees", employees);
+        request.getRequestDispatcher("/addAppointment.jsp").forward(request, response);
+    }
 
 
     @Override

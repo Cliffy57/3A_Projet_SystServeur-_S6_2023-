@@ -1,4 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.List" %>
+<%@ page import="fr.iut.licenceproservlet.Client" %>
+<%@ page import="fr.iut.licenceproservlet.Employee" %>
+
+<%
+    List<Client> clients = (List<Client>) request.getAttribute("clients");
+    List<Employee> employees = (List<Employee>) request.getAttribute("employees");
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,23 +22,24 @@
     <input type="datetime-local" id="date" name="date" required>
     <br>
 
-    <%--  Label and input for a double that is duration--%>
     <label for="duration">Duration:</label>
-    <input type="number" id="duration" name="duration" required>
+    <input type="number" id="duration" name="duration" min="1" required>
     <br>
 
-    <label for="clientFirstName">Client First Name:</label>
-    <input type="text" id="clientFirstName" name="clientFirstName" required>
-    <br>
-    <label for="clientLastName">Client Last Name:</label>
-    <input type="text" id="clientLastName" name="clientLastName" required>
+    <label for="client">Client:</label>
+    <select id="client" name="client" required>
+        <% for (Client client : clients) { %>
+        <option value="<%= client.getId() %>"><%= client.getFirstName() %> <%= client.getLastName() %></option>
+        <% } %>
+    </select>
     <br>
 
-    <label for="employeeFirstName">Employee First Name:</label>
-    <input type="text" id="employeeFirstName" name="employeeFirstName" required>
-    <br>
-    <label for="employeeLastName">Employee Last Name:</label>
-    <input type="text" id="employeeLastName" name="employeeLastName" required>
+    <label for="employee">Employee:</label>
+    <select id="employee" name="employee" required>
+        <% for (Employee employee : employees) { %>
+        <option value="<%= employee.getId() %>"><%= employee.getFirstName() %> <%= employee.getLastName() %></option>
+        <% } %>
+    </select>
     <br>
 
     <input type="submit" value="Add Appointment">

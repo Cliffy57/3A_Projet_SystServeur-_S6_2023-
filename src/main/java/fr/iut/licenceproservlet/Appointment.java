@@ -19,6 +19,9 @@ public class Appointment {
     @Column(name = "date")
     private Date date;
 
+    @Column(name = "duration")
+    private int duration;
+
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
@@ -27,8 +30,9 @@ public class Appointment {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    public Appointment(LocalDateTime date, Employee employee, Client client) {
+    public Appointment(LocalDateTime date,int duration, Employee employee, Client client) {
         this.date = Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
+        this.duration = duration;
         this.employee = employee;
         this.client = client;
     }
@@ -37,11 +41,11 @@ public class Appointment {
 
     }
 
-    public Appointment(Date date, Employee employee, Client client) {
-        this.date = date;
-        this.employee = employee;
-        this.client = client;
+    public Appointment(LocalDateTime now, Employee employee, Client client)
+    {
+        this(now, 30, employee, client);
     }
+
 
     // Constructeurs, getters et setters
 
@@ -101,6 +105,10 @@ public class Appointment {
 
     public void setEmployee(Employee employee) {
         this.employee = employee;
+    }
+
+    public String getDuration() {
+        return String.valueOf(duration);
     }
 
     // Autres méthodes pour modifier, supprimer, etc. des rendez-vous

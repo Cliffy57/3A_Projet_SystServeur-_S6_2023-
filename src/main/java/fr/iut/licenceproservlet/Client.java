@@ -71,6 +71,7 @@ public class Client {
         return lastname;
     }
 
+
     public void setName(String clientName) {
         this.lastname = clientName;
     }

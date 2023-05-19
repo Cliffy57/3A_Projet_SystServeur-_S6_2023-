@@ -93,6 +93,7 @@ public class AppointmentServlet extends HttpServlet {
     private void addAppointment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Get the form data
         String dateStr = request.getParameter("date");
+        int duration = Integer.parseInt(request.getParameter("duration"));
         LocalDateTime date = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         String clientName = request.getParameter("client");
         String employeeName = request.getParameter("employee");
@@ -118,7 +119,7 @@ public class AppointmentServlet extends HttpServlet {
             request.getRequestDispatcher("/new_index.jsp").forward(request, response);
         } else {
             // Create a new appointment object
-            Appointment appointment = new Appointment(date, employee, client);
+            Appointment appointment = new Appointment(date,duration, employee, client);
 
             // Save the appointment
             session.save(appointment);

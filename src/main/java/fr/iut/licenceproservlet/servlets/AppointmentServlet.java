@@ -263,7 +263,7 @@ public class AppointmentServlet extends HttpServlet {
     }
 
 
-    private void editAppointment(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void editAppointment(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         // Get the form data
         Long id = Long.parseLong(request.getParameter("id"));
         String dateStr = request.getParameter("date");
@@ -271,27 +271,43 @@ public class AppointmentServlet extends HttpServlet {
         Long clientId = Long.parseLong(request.getParameter("client_id"));
         Long employeeId = Long.parseLong(request.getParameter("employee_id"));
 
-
         // Retrieve the existing appointment using its ID
         Appointment appointment = reservationManager.getAppointmentById(id);
 
         if (appointment != null) {
-            // Update the appointment object with the new data
-            Client client = reservationManager.getClientById(clientId);
-            Employee employee = reservationManager.getEmployeeById(employeeId);
-            appointment.setDate(date);
-            appointment.setClient(client);
-            appointment.setEmployee(employee);
+            try {
+                // Update the appointment object with the new data
+                Client client = reservationManager.getClientById(clientId);
+                Employee employee = reservationManager.getEmployeeById(employeeId);
+                appointment.setDate(date);
+                appointment.setClient(client);
+                appointment.setEmployee(employee);
 
-            // Save the updated appointment using the reservationManager
-            reservationManager.updateAppointment(appointment);
-            // Redirect or forward to appropriate page
-            response.sendRedirect(request.getContextPath() + APPOINTMENTS_PAGE);
+                // Save the updated appointment using the reservationManager
+                reservationManager.updateAppointment(appointment);
+
+                // Redirect or forward to appropriate page
+                response.sendRedirect(request.getContextPath() + APPOINTMENTS_PAGE);
+            } catch (IllegalStateException e) {
+                // handle error here and display on JSP
+                request.setAttribute("error", e.getMessage());
+
+                // Add the necessary attributes to the request
+                List<Client> clients = reservationManager.getClients();
+                List<Employee> employees = reservationManager.getEmployees();
+                request.setAttribute("appointment", appointment);
+                request.setAttribute("clients", clients);
+                request.setAttribute("employees", employees);
+
+                // forward to the modify appointment page
+                request.getRequestDispatcher("editAppointment.jsp").forward(request, response);
+            }
         } else {
             // Appointment not found, handle accordingly
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Appointment not found");
         }
     }
+
 
     private void deleteAppointment(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Get the appointment ID to be deleted

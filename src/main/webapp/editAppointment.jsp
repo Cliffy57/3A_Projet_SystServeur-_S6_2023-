@@ -8,6 +8,7 @@
   List<Client> clients = (List<Client>) request.getAttribute("clients");
   List<Employee> employees = (List<Employee>) request.getAttribute("employees");
   Appointment appointment = (Appointment) request.getAttribute("appointment");
+  String error = (String) request.getAttribute("error");
 %>
 <!DOCTYPE html>
 <html>
@@ -39,6 +40,11 @@
 </head>
 <body>
 <div class="container">
+  <% if (error != null) { %>
+  <div class="alert alert-danger" role="alert">
+    <%= error %>
+  </div>
+  <% } %>
   <a href="appointment-servlet" class="btn btn-secondary my-2">Return</a>
   <h1 class="my-4">Modify Appointment</h1>
   <form action="appointment-servlet" method="post">

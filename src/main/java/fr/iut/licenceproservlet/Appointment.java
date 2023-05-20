@@ -4,7 +4,6 @@ package fr.iut.licenceproservlet;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "appointment")
@@ -72,7 +71,7 @@ public class Appointment {
         this.employee = employee;
     }
 
-    public String getDuration() {
-        return String.valueOf(duration);
+    public int getDuration() {
+        return duration;
     }
 }

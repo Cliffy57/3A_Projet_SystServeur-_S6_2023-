@@ -2,7 +2,11 @@ package fr.iut.licenceproservlet;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import fr.iut.licenceproservlet.servlets.AppointmentServlet;
 import fr.iut.licenceproservlet.utils.HibernateUtil;
 import org.hibernate.Session;
 
@@ -16,9 +20,12 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+
 public class ReservationManager {
 
     private EntityManagerFactory emf;
+
+    private static final Logger logger = Logger.getLogger(AppointmentServlet.class.getName());
 
     public ReservationManager() {
         emf = Persistence.createEntityManagerFactory("reservation-pu");
@@ -32,7 +39,7 @@ public class ReservationManager {
         Session session = HibernateUtil.getSession();
         session.beginTransaction();
         List<Appointment> result = session.createQuery("from Appointment", Appointment.class).list();
-        System.out.println("Retrieved " + result.size() + " appointments by reservation manager");
+        logger.log(Level.INFO,"Retrieved " + result.size() + " appointments by reservation manager");
         session.getTransaction().commit();
         session.close();
         return result;
@@ -62,29 +69,55 @@ public class ReservationManager {
         return employee;
     }
 
-    public boolean hasConflictingAppointments(Client client, Employee employee, LocalDateTime date) {
-        // Query the database for appointments with the same date and either the same client or the same employee
-        String hql = "FROM Appointment WHERE date = :date AND (client.id = :clientId OR employee.id = :employeeId)";
+    /**
+     * Verify if an appointment already exists for the given client and employee at the given date
+     * Now, the HQL query checks for three types of conflict:
+     *
+     *     The start of the new appointment falls within an existing appointment.
+     *     The end of the new appointment falls within an existing appointment.
+     *     An existing appointment falls entirely within the new appointment.
+     * @param client
+     * @param employee
+     * @param startDate
+     * @param duration
+     * @return
+     */
+
+    public boolean hasConflictingAppointments(Client client, Employee employee, LocalDateTime startDate, int duration) {
+        // Calculate the end date of the new appointment
+        LocalDateTime endDate = startDate.plusMinutes(duration);
+        System.out.println("endDate = " + endDate);
+
+        // Query the database for appointments that overlap with the new appointment
+        String hql = "FROM Appointment WHERE " +
+                "((date <= :startDate AND :startDate < (date + duration)) OR " +
+                "(:startDate <= date AND date < :endDate) OR " +
+                "(date < :endDate AND :endDate <= (date + duration))) AND " +
+                "(client.id = :clientId OR employee.id = :employeeId)";
+
         Session session = HibernateUtil.getSession();
         Query query = session.createQuery(hql);
-        query.setParameter("date", date);
+        query.setParameter("startDate", startDate);
+        query.setParameter("endDate", endDate);
         query.setParameter("clientId", client.getId());
         query.setParameter("employeeId", employee.getId());
 
         List<Appointment> conflictingAppointments = query.list();
-        System.out.printf("Found %d conflicting appointments%n", conflictingAppointments.size());
-        System.out.println(conflictingAppointments);
+        logger.log(Level.WARNING, "Found " + conflictingAppointments.size() + " conflicting appointments");
+        logger.log(Level.INFO, conflictingAppointments.toString());
+
         // Return true if conflicting appointments are found, false otherwise
         return !conflictingAppointments.isEmpty();
     }
 
 
-        public void updateAppointment(Appointment appointment) {
+    public void updateAppointment(Appointment appointment) {
         Session session = HibernateUtil.getSession();
         session.beginTransaction();
 
         // Check for conflicting appointments
-        if (hasConflictingAppointments(appointment.getClient(), appointment.getEmployee(), appointment.getDate())) {
+        if (hasConflictingAppointments(appointment.getClient(), appointment.getEmployee(), appointment.getDate(),
+                appointment.getDuration())) {
             throw new IllegalStateException("Cannot update appointment. Conflicting appointment already exists.");
         }
 
@@ -106,7 +139,7 @@ public class ReservationManager {
         Session session = HibernateUtil.getSession();
         session.beginTransaction();
         List<Client> result = session.createQuery("from Client", Client.class).list();
-        System.out.println("Retrieved " + result.size() + " clients by reservation manager");
+        logger.log(Level.INFO,"Retrieved " + result.size() + " clients by reservation manager");
         session.getTransaction().commit();
         session.close();
         return result;
@@ -115,7 +148,7 @@ public class ReservationManager {
         Session session = HibernateUtil.getSession();
         session.beginTransaction();
         List<Employee> result = session.createQuery("from Employee", Employee.class).list();
-        System.out.println("Retrieved " + result.size() + " employees by reservation manager");
+        logger.log(Level.INFO,"Retrieved " + result.size() + " employees by reservation manager");
         session.getTransaction().commit();
         session.close();
         return result;

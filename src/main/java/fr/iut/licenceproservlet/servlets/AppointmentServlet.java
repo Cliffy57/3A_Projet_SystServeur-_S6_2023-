@@ -238,7 +238,7 @@ public class AppointmentServlet extends HttpServlet {
         Employee employee = reservationManager.getEmployeeById(employeeId);
 
         // Check for conflicting appointments
-        if (reservationManager.hasConflictingAppointments(client, employee, date)) {
+        if (reservationManager.hasConflictingAppointments(client, employee, date,duration)) {
             // Handle conflicting appointments, show error message or redirect to a different page;
             logger.log(Level.INFO,"Conflicting appointments");
             request.setAttribute("error", "Appointment already exists");

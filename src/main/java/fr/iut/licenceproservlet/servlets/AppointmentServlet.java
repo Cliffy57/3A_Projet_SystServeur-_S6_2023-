@@ -17,89 +17,161 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @WebServlet(name = "appointmentServlet", value = "/appointment-servlet")
 public class AppointmentServlet extends HttpServlet {
 
-    private ReservationManager reservationManager;
+    /**
+     * The reservation manager.
+     * This is the class that will handle the database operations.
+     * It is instantiated in the init() method and closed in the destroy() method.
+     * It is used in all the methods of the servlet.
+     */
+    private transient ReservationManager reservationManager;
+    /**
+     * The logger.
+     * It is used to log messages to the console.
+     * It is instantiated in the init() method and closed in the destroy() method.
+     */
+    private static final Logger logger = Logger.getLogger(AppointmentServlet.class.getName());
 
+    private static final String APPOINTMENTS_PAGE = "/appointments";
+
+
+    @Override
     public void init() throws jakarta.servlet.ServletException {
         super.init();
         reservationManager = new ReservationManager();
+        logger.info("Appointment servlet initialized");
     }
 
+    @Override
     public void destroy() {
         reservationManager.close();
+        logger.info("Appointment servlet destroyed");
         super.destroy();
     }
 
+    /**
+     * @param request The request object
+     * @param response The response object
+     * @throws ServletException If the request for the GET could not be handled
+     * @throws IOException If an input or output error is detected when the servlet handles the GET request
+     */
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-
         if (action == null || "sort".equals(action)) {
-            List<Appointment> appointments;
-
-            if ("sort".equals(action)) {
-                String sortBy = request.getParameter("by");
-                switch (sortBy) {
-                    case "date":
-                        appointments = reservationManager.getAppointmentsSortedByDate();
-                        break;
-                    case "client":
-                        appointments = reservationManager.getAppointmentsSortedByClient();
-                        break;
-                    case "employee":
-                        appointments = reservationManager.getAppointmentsSortedByEmployee();
-                        break;
-                    default:
-                        appointments = reservationManager.getAppointments();
-                        break;
-                }
-            } else {
-                appointments = reservationManager.getAppointments();
-            }
-
-            System.out.println("Retrieved " + appointments.size() + " appointments by Servlet");
-
-            // Set the appointments as an attribute in the request scope
-            request.setAttribute("appointments", appointments);
-
-            // Forward the request to the JSP
-            RequestDispatcher dispatcher = request.getRequestDispatcher("new_index.jsp");
-            dispatcher.forward(request, response);
+            processAppointmentRequest(request, response, action);
         } else {
-            switch (action) {
-                case "new":
-                    showNewAppointmentForm(request, response);
-                    break;
-                case "modify":
-                    // handle modify action (show modify appointment form)
-                    String idStr = request.getParameter("id");
-                    if (idStr != null) {
-                        Long id = Long.parseLong(idStr);
-                        Appointment appointment = reservationManager.getAppointmentById(id);
-                        if (appointment != null) {
-                            // Set the clients as an attribute in the request scope
-                            request.setAttribute("clients", reservationManager.getClients());
-                            // Set the employees as an attribute in the request scope
-                            request.setAttribute("employees", reservationManager.getEmployees());
-                            // Set the appointment as an attribute in the request scope
-                            request.setAttribute("appointment", appointment);
-                            request.getRequestDispatcher("/editAppointment.jsp").forward(request, response);
-                        } else {
-                            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Appointment not found");
-                        }
-                    } else {
-                        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No appointment ID provided");
-                    }
-                    break;
-                default:
-                    // Handle unexpected action values accordingly
-            }
+            processActionRequest(request, response, action);
         }
     }
 
+    /**
+     * @throws IOException
+     *
+     * This method is called when the action parameter is null or "sort".
+     * It retrieves the list of appointments from the reservation manager and forwards it to the JSP.
+     * If the action parameter is "sort", it sorts the list of appointments before forwarding it.
+     * The sorting is done by the sortAppointments() method.
+     */
 
+    private void processAppointmentRequest(HttpServletRequest request, HttpServletResponse response, String action) throws ServletException, IOException {
+        List<Appointment> appointments;
+
+        if ("sort".equals(action)) {
+            appointments = sortAppointments(request.getParameter("by"));
+        } else {
+            appointments = reservationManager.getAppointments();
+        }
+
+        logger.log(Level.INFO,"Retrieved {0} appointments by Servlet",appointments.size() );
+        request.setAttribute("appointments", appointments);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("new_index.jsp");
+        dispatcher.forward(request, response);
+    }
+    /**
+      sortAppointments() method
+        This method sorts the list of appointments according to the value of the sortBy parameter.
+        The sortBy parameter can have the following values:
+        - "date" (sort by date)
+        - "client" (sort by client)
+        - "employee" (sort by employee)
+        - any other value (no sorting)
+     */
+    private List<Appointment> sortAppointments(String sortBy) {
+        switch (sortBy) {
+            case "date":
+                return reservationManager.getAppointmentsSortedByDate();
+            case "client":
+                return reservationManager.getAppointmentsSortedByClient();
+            case "employee":
+                return reservationManager.getAppointmentsSortedByEmployee();
+            default:
+                return reservationManager.getAppointments();
+        }
+    }
+    /**
+        processActionRequest() method
+            This method is called when the action parameter is not null and not "sort".
+            It retrieves the value of the action parameter and calls the appropriate method.
+            The action parameter can have the following values:
+            - "new" (show the new appointment form)
+            - "modify" (show the edit appointment form)
+            - any other value (handle the action accordingly)
+     */
+    private void processActionRequest(HttpServletRequest request, HttpServletResponse response, String action) throws ServletException, IOException {
+        switch (action) {
+            case "new":
+                showNewAppointmentForm(request, response);
+                break;
+            case "modify":
+                modifyAppointment(request, response);
+                break;
+            default:
+                // Handle unexpected action values accordingly
+        }
+    }
+    /**
+        modifyAppointment() method
+            This method is called when the action parameter is "modify".
+            It retrieves the value of the id parameter and calls the prepareAndForwardToEditAppointment() method.
+            If the id parameter is null, it sends an error response with the status code 400 (Bad Request).
+            If the id parameter is not null but the appointment is not found, it sends an error response with the status code 404 (Not Found).
+     */
+    private void modifyAppointment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String idStr = request.getParameter("id");
+        if (idStr != null) {
+            Long id = Long.parseLong(idStr);
+            Appointment appointment = reservationManager.getAppointmentById(id);
+            if (appointment != null) {
+                prepareAndForwardToEditAppointment(request, response, appointment);
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Appointment not found");
+            }
+        } else {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No appointment ID provided");
+        }
+    }
+    /**
+        prepareAndForwardToEditAppointment() method
+            This method prepares the request attributes and forwards the request to the editAppointment.jsp page.
+            It is called by the modifyAppointment() method.
+     */
+    private void prepareAndForwardToEditAppointment(HttpServletRequest request, HttpServletResponse response, Appointment appointment) throws ServletException, IOException {
+        request.setAttribute("clients", reservationManager.getClients());
+        request.setAttribute("employees", reservationManager.getEmployees());
+        request.setAttribute("appointment", appointment);
+        request.getRequestDispatcher("/editAppointment.jsp").forward(request, response);
+    }
+    /**
+        showNewAppointmentForm() method
+            This method prepares the request attributes and forwards the request to the addAppointment.jsp page.
+            It is called by the processActionRequest() method.
+     */
     private void showNewAppointmentForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Session session = HibernateUtil.getSession();
         session.beginTransaction();
@@ -113,8 +185,16 @@ public class AppointmentServlet extends HttpServlet {
         request.setAttribute("employees", employees);
         request.getRequestDispatcher("/addAppointment.jsp").forward(request, response);
     }
-
-
+    /**
+     doPost method
+        This method is called when the HTTP POST request is sent to the servlet.
+        It retrieves the value of the action parameter and calls the appropriate method.
+        The action parameter can have the following values:
+        - "add" (add a new appointment)
+        - "update" (update an existing appointment)
+        - "delete" (delete an existing appointment)
+        - any other value (handle the action accordingly)
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String action = request.getParameter("action");
@@ -133,27 +213,10 @@ public class AppointmentServlet extends HttpServlet {
                 default:
                     break;
             }
-        } else {
-            // Invalid action parameter, handle accordingly
+        }  else {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing action parameter");
         }
-    }
 
-    private void getAppointmentById(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, jakarta.servlet.ServletException {
-        String appointmentId = request.getParameter("id");
-
-        if (appointmentId != null) {
-            Long id = Long.parseLong(appointmentId);
-            Appointment appointment = reservationManager.getAppointmentById(id);
-
-            if (appointment != null) {
-                request.setAttribute("appointment", appointment);
-                request.getRequestDispatcher("/appointment.jsp").forward(request, response);
-            } else {
-                // Appointment not found, handle accordingly
-            }
-        } else {
-            // Invalid ID parameter, handle accordingly
-        }
     }
 
     private void addAppointment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -176,8 +239,8 @@ public class AppointmentServlet extends HttpServlet {
 
         // Check for conflicting appointments
         if (reservationManager.hasConflictingAppointments(client, employee, date)) {
-            // Handle conflicting appointments, show error message or redirect to a different page
-            System.out.println("Conflicting appointments");
+            // Handle conflicting appointments, show error message or redirect to a different page;
+            logger.log(Level.INFO,"Conflicting appointments");
             request.setAttribute("error", "Appointment already exists");
             // Fetch appointments and set as attribute
             List<Appointment> appointments = reservationManager.getAppointments();
@@ -195,12 +258,12 @@ public class AppointmentServlet extends HttpServlet {
             session.getTransaction().commit();
 
             // Redirect or forward to appropriate page
-            response.sendRedirect(request.getContextPath() + "/appointments");
+            response.sendRedirect(request.getContextPath() + APPOINTMENTS_PAGE);
         }
     }
 
 
-    private void editAppointment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void editAppointment(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Get the form data
         Long id = Long.parseLong(request.getParameter("id"));
         String dateStr = request.getParameter("date");
@@ -223,13 +286,14 @@ public class AppointmentServlet extends HttpServlet {
             // Save the updated appointment using the reservationManager
             reservationManager.updateAppointment(appointment);
             // Redirect or forward to appropriate page
-            response.sendRedirect(request.getContextPath() + "/appointments");
+            response.sendRedirect(request.getContextPath() + APPOINTMENTS_PAGE);
         } else {
             // Appointment not found, handle accordingly
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Appointment not found");
         }
     }
 
-    private void deleteAppointment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void deleteAppointment(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Get the appointment ID to be deleted
         Long id = Long.parseLong(request.getParameter("id"));
 
@@ -241,10 +305,12 @@ public class AppointmentServlet extends HttpServlet {
             reservationManager.deleteAppointment(appointment);
 
             // Redirect or forward to appropriate page
-            response.sendRedirect(request.getContextPath() + "/appointments");
-        } else {
-            // Appointment not found, handle accordingly
+            response.sendRedirect(request.getContextPath() + APPOINTMENTS_PAGE);
+        }  else {
+            // Appointment not found, throw an exception or show an error page
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Appointment not found");
         }
+
     }
 
 }

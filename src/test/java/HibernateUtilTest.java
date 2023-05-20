@@ -3,18 +3,19 @@ import fr.iut.licenceproservlet.Client;
 import fr.iut.licenceproservlet.Employee;
 import fr.iut.licenceproservlet.utils.HibernateUtil;
 import org.hibernate.Session;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+class HibernateUtilTest {
 
-public class HibernateUtilTest {
-
-    private HibernateUtil hibernateUtils;
+    /**
+     * Test the insertion of a client
+     * This test is not really useful, it's just to show you how to insert a client
+      */
     @Test
-    public void testSaveClient() {
+    void testSaveClient() {
       Session session = HibernateUtil.getSession();
       session.beginTransaction();
         Client john = new Client("Doe", "John", "johndoe@hotmail.com");
@@ -23,12 +24,17 @@ public class HibernateUtilTest {
 
       List<Client> clients = session.createQuery("from Client", Client.class).list();
       for(Client client : clients) {
-        System.out.println(client.getNom());
+        System.out.println(client.getLastName());
       }
       session.getTransaction().commit();
     }
+
+    /**
+     * Test the insertion of an appointment
+     * This test is not really useful, it's just to show you how to insert an appointment
+     */
     @Test
-    public void testSaveAppointment() {
+    void testSaveAppointment() {
         Session session = HibernateUtil.getSession();
         session.clear(); // Clear the session to ensure it's in sync with the database
         session.beginTransaction();
@@ -56,8 +62,15 @@ public class HibernateUtilTest {
 
         session.getTransaction().commit();
     }
+
+    /**
+     * Test the retrieval of all appointments
+     * This test is not really useful, it's just to show you how to retrieve all appointments
+     * from the database
+     * You can use this method to check if your appointment has been saved
+     */
     @Test
-    public void testRetrieveAllAppointments() {
+    void testRetrieveAllAppointments() {
         Session session = HibernateUtil.getSession();
         session.beginTransaction();
 

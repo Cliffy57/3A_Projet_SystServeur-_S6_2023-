@@ -37,30 +37,6 @@ public class Employee {
         this.id = id;
     }
 
-    public String getNom() {
-        return lastname;
-    }
-
-    public void setNom(String name) {
-        this.lastname = name;
-    }
-
-    public String getPrename() {
-        return firstname;
-    }
-
-    public void setPrename(String surname) {
-        this.firstname = surname;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getFirstName() {
         return firstname;
     }

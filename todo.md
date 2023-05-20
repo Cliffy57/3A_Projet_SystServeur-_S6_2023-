@@ -26,3 +26,7 @@ exception jakarta.servlet.ServletException: java.lang.NoClassDefFoundError: java
 org.apache.jasper.servlet.JspServlet.service(JspServlet.java:333)
 jakarta.servlet.http.HttpServlet.service(HttpServlet.java:631)
 org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+
+## Amélioration possible
+
+https://www.thymeleaf.org/ 

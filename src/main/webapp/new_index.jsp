@@ -64,5 +64,9 @@
     %>
     </tbody>
 </table>
+<!-- Add Sorting Buttons -->
+<button type="button" onclick="window.location.href='appointment-servlet?action=sort&by=date'">Sort by Date</button>
+<button type="button" onclick="window.location.href='appointment-servlet?action=sort&by=client'">Sort by Client</button>
+<button type="button" onclick="window.location.href='appointment-servlet?action=sort&by=employee'">Sort by Employee</button>
 </body>
 </html>

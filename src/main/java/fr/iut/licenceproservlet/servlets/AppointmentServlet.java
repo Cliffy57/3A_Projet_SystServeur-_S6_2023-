@@ -36,10 +36,30 @@ public class AppointmentServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
 
-        if (action == null) { // If there's no action parameter, show the appointments
-            List<Appointment> appointments = reservationManager.getAppointments(); // Your logic to retrieve appointments
+        if (action == null || "sort".equals(action)) {
+            List<Appointment> appointments;
 
-            System.out.println("Retrieved " + appointments.size() + " appointments by Servlet");  // <-- Add this line
+            if ("sort".equals(action)) {
+                String sortBy = request.getParameter("by");
+                switch (sortBy) {
+                    case "date":
+                        appointments = reservationManager.getAppointmentsSortedByDate();
+                        break;
+                    case "client":
+                        appointments = reservationManager.getAppointmentsSortedByClient();
+                        break;
+                    case "employee":
+                        appointments = reservationManager.getAppointmentsSortedByEmployee();
+                        break;
+                    default:
+                        appointments = reservationManager.getAppointments();
+                        break;
+                }
+            } else {
+                appointments = reservationManager.getAppointments();
+            }
+
+            System.out.println("Retrieved " + appointments.size() + " appointments by Servlet");
 
             // Set the appointments as an attribute in the request scope
             request.setAttribute("appointments", appointments);
@@ -78,6 +98,7 @@ public class AppointmentServlet extends HttpServlet {
             }
         }
     }
+
 
     private void showNewAppointmentForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Session session = HibernateUtil.getSession();

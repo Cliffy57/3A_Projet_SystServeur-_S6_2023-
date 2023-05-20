@@ -7,6 +7,7 @@ import java.util.Objects;
 import fr.iut.licenceproservlet.exception.ClientEmployeOverlapException;
 import fr.iut.licenceproservlet.utils.HibernateUtil;
 import org.hibernate.Session;
+
 import org.hibernate.query.Query;
 
 import javax.persistence.EntityManager;
@@ -14,6 +15,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 public class ReservationManager {
 
@@ -189,4 +193,39 @@ public class ReservationManager {
         session.close();
         return result;
     }
+
+    public List<Appointment> getAppointmentsSortedByEmployee() {
+        EntityManager em = emf.createEntityManager();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Appointment> query = cb.createQuery(Appointment.class);
+        Root<Appointment> root = query.from(Appointment.class);
+        query.orderBy(cb.asc(root.get("employee").get("lastname")), cb.asc(root.get("employee").get("firstname")));
+        List<Appointment> result = em.createQuery(query).getResultList();
+        em.close();
+        return result;
+    }
+
+    public List<Appointment> getAppointmentsSortedByClient() {
+        EntityManager em = emf.createEntityManager();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Appointment> query = cb.createQuery(Appointment.class);
+        Root<Appointment> root = query.from(Appointment.class);
+        query.orderBy(cb.asc(root.get("client").get("lastname")), cb.asc(root.get("client").get("firstname")));
+        List<Appointment> result = em.createQuery(query).getResultList();
+        em.close();
+        return result;
+    }
+
+    public List<Appointment> getAppointmentsSortedByDate() {
+        EntityManager em = emf.createEntityManager();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Appointment> query = cb.createQuery(Appointment.class);
+        Root<Appointment> root = query.from(Appointment.class);
+        query.orderBy(cb.asc(root.get("date")));
+        List<Appointment> result = em.createQuery(query).getResultList();
+        em.close();
+        return result;
+    }
+
+
 }

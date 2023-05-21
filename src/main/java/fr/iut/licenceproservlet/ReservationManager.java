@@ -70,12 +70,8 @@ public class ReservationManager {
     }
 
     /**
-     * Verify if an appointment already exists for the given client and employee at the given date
-     * Now, the HQL query checks for three types of conflict:
-     *
-     *     The start of the new appointment falls within an existing appointment.
-     *     The end of the new appointment falls within an existing appointment.
-     *     An existing appointment falls entirely within the new appointment.
+     * Checks if there are any appointments for the given client or employee on the same day as the new appointment
+     * that is UPDATED to the database.
      * @param client
      * @param employee
      * @param startDate
@@ -83,32 +79,50 @@ public class ReservationManager {
      * @return
      */
 
-    public boolean hasConflictingAppointments(Client client, Employee employee, LocalDateTime startDate, int duration) {
+    public boolean hasConflictingAppointments(Client client, Employee employee, LocalDateTime startDate, int duration, Long appointmentId) {
         // Calculate the end date of the new appointment
         LocalDateTime endDate = startDate.plusMinutes(duration);
-        System.out.println("endDate = " + endDate);
 
-        // Query the database for appointments that overlap with the new appointment
+        // Get the start and end of the day in question
+        LocalDateTime startOfDay = startDate.withHour(0).withMinute(0);
+        LocalDateTime endOfDay = startDate.withHour(23).withMinute(59);
+
+        // Query the database for appointments of the client or the employee that occur on the same day as the new appointment
+        // Exclude the appointment being updated
         String hql = "FROM Appointment WHERE " +
-                "((date <= :startDate AND :startDate < (date + duration)) OR " +
-                "(:startDate <= date AND date < :endDate) OR " +
-                "(date < :endDate AND :endDate <= (date + duration))) AND " +
+                "date BETWEEN :startOfDay AND :endOfDay AND " +
+                "id != :appointmentId AND " +
                 "(client.id = :clientId OR employee.id = :employeeId)";
 
         Session session = HibernateUtil.getSession();
         Query query = session.createQuery(hql);
-        query.setParameter("startDate", startDate);
-        query.setParameter("endDate", endDate);
+        query.setParameter("startOfDay", startOfDay);
+        query.setParameter("endOfDay", endOfDay);
         query.setParameter("clientId", client.getId());
         query.setParameter("employeeId", employee.getId());
+        query.setParameter("appointmentId", appointmentId);
 
-        List<Appointment> conflictingAppointments = query.list();
-        logger.log(Level.WARNING, "Found " + conflictingAppointments.size() + " conflicting appointments");
-        logger.log(Level.INFO, conflictingAppointments.toString());
+        List<Appointment> appointmentsOnSameDay = query.list();
 
-        // Return true if conflicting appointments are found, false otherwise
-        return !conflictingAppointments.isEmpty();
+        // Loop over the appointments and check if any of them overlap with the new appointment
+        for (Appointment appointment : appointmentsOnSameDay) {
+            LocalDateTime existingStartDate = appointment.getDate();
+            LocalDateTime existingEndDate = existingStartDate.plusMinutes(appointment.getDuration());
+
+            // Check if the new appointment starts or ends during the existing one
+            if ((startDate.isEqual(existingStartDate) || startDate.isAfter(existingStartDate)) && startDate.isBefore(existingEndDate)
+                    || (endDate.isAfter(existingStartDate) && endDate.isBefore(existingEndDate))
+                    || (startDate.isBefore(existingStartDate) && endDate.isAfter(existingEndDate))) {
+                logger.log(Level.WARNING,"Found a conflicting appointment: " + appointment);
+                return true;
+            }
+        }
+
+        // No conflicting appointments found
+        return false;
     }
+
+
 
 
     public void updateAppointment(Appointment appointment) {
@@ -117,7 +131,7 @@ public class ReservationManager {
 
         // Check for conflicting appointments
         if (hasConflictingAppointments(appointment.getClient(), appointment.getEmployee(), appointment.getDate(),
-                appointment.getDuration())) {
+                appointment.getDuration(), appointment.getId())) {
             throw new IllegalStateException("Cannot update appointment. Conflicting appointment already exists.");
         }
 
@@ -125,6 +139,7 @@ public class ReservationManager {
         session.update(appointment);
         session.getTransaction().commit();
     }
+
 
     public void deleteAppointment(Appointment appointment) {
         EntityManager em = emf.createEntityManager();
@@ -187,5 +202,53 @@ public class ReservationManager {
         return result;
     }
 
+    /**
+     * Checks if there are any appointments for the given client or employee on the same day as the new appointment
+     * that is ADDED to the database.
+     * @param client
+     * @param employee
+     * @param startDate
+     * @param duration
+     * @return
+     */
+    public boolean hasConflictingAppointments(Client client, Employee employee, LocalDateTime startDate, int duration) {
+        // Calculate the end date of the new appointment
+        LocalDateTime endDate = startDate.plusMinutes(duration);
+
+        // Get the start and end of the day in question
+        LocalDateTime startOfDay = startDate.withHour(0).withMinute(0);
+        LocalDateTime endOfDay = startDate.withHour(23).withMinute(59);
+
+        // Query the database for appointments of the client or the employee that occur on the same day as the new appointment
+        String hql = "FROM Appointment WHERE " +
+                "date BETWEEN :startOfDay AND :endOfDay AND " +
+                "(client.id = :clientId OR employee.id = :employeeId)";
+
+        Session session = HibernateUtil.getSession();
+        Query query = session.createQuery(hql);
+        query.setParameter("startOfDay", startOfDay);
+        query.setParameter("endOfDay", endOfDay);
+        query.setParameter("clientId", client.getId());
+        query.setParameter("employeeId", employee.getId());
+
+        List<Appointment> appointmentsOnSameDay = query.list();
+
+        // Loop over the appointments and check if any of them overlap with the new appointment
+        for (Appointment appointment : appointmentsOnSameDay) {
+            LocalDateTime existingStartDate = appointment.getDate();
+            LocalDateTime existingEndDate = existingStartDate.plusMinutes(appointment.getDuration());
+
+            // Check if the new appointment starts or ends during the existing one
+            if ((startDate.isEqual(existingStartDate) || startDate.isAfter(existingStartDate)) && startDate.isBefore(existingEndDate)
+                    || (endDate.isAfter(existingStartDate) && endDate.isBefore(existingEndDate))
+                    || (startDate.isBefore(existingStartDate) && endDate.isAfter(existingEndDate))) {
+                logger.log(Level.WARNING,"Found a conflicting appointment: " + appointment);
+                return true;
+            }
+        }
+
+        // No conflicting appointments found
+        return false;
+    }
 
 }

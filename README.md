@@ -23,7 +23,7 @@ git clone https://github.com/Cliffy57/3A_Projet_SystServeur-_S6_2023-.git
 
     Importez la base de données
 
-    Vous pouvez importer la base de données à partir du fichier .sql inclus dans le projet.
+    Vous pouvez importer la base de données à partir des 3 fichiers .sql inclus dans le projet.
 
     Configurer le fichier hibernate.cfg.xml
 

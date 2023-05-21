@@ -7,9 +7,13 @@
     <servlet>
         <servlet-name>AppointmentServlet</servlet-name>
         <servlet-class>fr.iut.licenceproservlet.servlets.AppointmentServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>AppointmentServlet</servlet-name>
-        <url-pattern>/appointments</url-pattern>
+        <url-pattern>/appointment-servlet</url-pattern>
     </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>appointment-servlet</welcome-file>
+    </welcome-file-list>
 </web-app>

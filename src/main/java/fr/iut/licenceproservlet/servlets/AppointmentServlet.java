@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@WebServlet(name = "appointmentServlet", value = "/appointment-servlet")
+@WebServlet(name = "AppointmentServlet", value = "/appointment-servlet")
 public class AppointmentServlet extends HttpServlet {
 
     /**
@@ -90,7 +90,7 @@ public class AppointmentServlet extends HttpServlet {
 
         logger.log(Level.INFO,"Retrieved {0} appointments by Servlet",appointments.size() );
         request.setAttribute("appointments", appointments);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("new_index.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/index.jsp");
         dispatcher.forward(request, response);
     }
     /**
@@ -246,7 +246,7 @@ public class AppointmentServlet extends HttpServlet {
             List<Appointment> appointments = reservationManager.getAppointments();
             request.setAttribute("appointments", appointments);
             // Forward to JSP
-            request.getRequestDispatcher("/new_index.jsp").forward(request, response);
+            request.getRequestDispatcher("/index.jsp").forward(request, response);
         } else {
             // Create a new appointment object
             Appointment appointment = new Appointment(date, duration, employee, client);

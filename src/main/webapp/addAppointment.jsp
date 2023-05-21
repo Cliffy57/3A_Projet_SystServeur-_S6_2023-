@@ -47,7 +47,7 @@
         </div>
 
         <div class="form-group">
-            <label for="duration">Duration:</label>
+            <label for="duration">Duration (in minutes):</label>
             <input type="number" id="duration" name="duration" min="1" class="form-control" required>
         </div>
 
